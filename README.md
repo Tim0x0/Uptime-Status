@@ -110,8 +110,8 @@ npm install
 
 在 `.env` 文件中修改以下配置：
 ```bash
-# UptimeRobot API Key
-VITE_UPTIMEROBOT_API_KEY = "ur2290572-af4663a4e3f83be26119abbe"
+# UptimeRobot API Key（后端使用，不会暴露到前端）
+UPTIMEROBOT_API_KEY = "你的API密钥"
 
 # UptimeRobot API URL 
 # 除腾讯云 EdgeOne Pages 、vercel 、cloudflare pages 外 
@@ -126,6 +126,9 @@ VITE_APP_TITLE = "梦爱吃鱼"
 # 支持 friendly_name 和 create_datetime 两种方式
 VITE_UPTIMEROBOT_STATUS_SORT = "friendly_name"
 ```
+
+> **注意：** API Key 现在在后端（边缘函数）中使用，不会暴露到前端代码中，更加安全。
+
 
 4. 开发调试
 ```bash

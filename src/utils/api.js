@@ -8,7 +8,6 @@ import { processMonitorData, generateTimeRanges } from './monitor'
 
 /** API 配置常量 */
 const API_URL = import.meta.env.VITE_UPTIMEROBOT_API_URL
-const API_KEY = import.meta.env.VITE_UPTIMEROBOT_API_KEY
 
 /* 面板排序方式 */
 const STATUS_SORT = import.meta.env.VITE_UPTIMEROBOT_STATUS_SORT
@@ -18,6 +17,7 @@ const STATUS_SORT = import.meta.env.VITE_UPTIMEROBOT_STATUS_SORT
  * @async
  * @returns {Promise<Array>} 处理后的监控数据数组
  * @throws {Error} 当 API 请求失败时抛出错误
+ * @note API Key 现在由后端边缘函数处理，前端不再传递敏感凭证
  */
 export const fetchMonitorData = async () => {
   const controller = new AbortController()
@@ -27,7 +27,7 @@ export const fetchMonitorData = async () => {
     const response = await axios.post(
       API_URL,
       {
-        api_key: API_KEY,
+        // 注意：不再传递 api_key，由后端自动添加
         format: 'json',
         response_times: 1,
         logs: 1,
@@ -47,12 +47,12 @@ export const fetchMonitorData = async () => {
 
     if (STATUS_SORT === 'friendly_name') {
       return response.data.monitors
-      .sort((a, b) => b.friendly_name - a.friendly_name)
-      .map(processMonitorData)
+        .sort((a, b) => b.friendly_name - a.friendly_name)
+        .map(processMonitorData)
     } else if (STATUS_SORT === 'create_datetime') {
       return response.data.monitors
-      .sort((a, b) => b.create_datetime - a.create_datetime)
-      .map(processMonitorData)
+        .sort((a, b) => b.create_datetime - a.create_datetime)
+        .map(processMonitorData)
     }
 
   } catch (error) {
