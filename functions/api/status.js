@@ -8,9 +8,8 @@
  * - Cloudflare Pages
  * 
  * 环境变量配置说明：
- * 在 .env 文件中设置 VITE_UPTIMEROBOT_API_URL:
- * - 使用默认配置：设置为 "/api/status"
- * - 其他部署方式：设置为你的完整代理地址
+ * 1. UPTIMEROBOT_API_KEY: UptimeRobot 的只读 API 密钥（必需）
+ * 2. VITE_UPTIMEROBOT_API_URL: API 代理地址（前端使用，设置为 "/api/status"）
  */
 
 export async function onRequest(context) {
@@ -27,14 +26,39 @@ export async function onRequest(context) {
   }
 
   try {
-    // 从请求中获取数据
+    // 从环境变量读取 API Key（后端安全存储）
+    const apiKey = context.env.UPTIMEROBOT_API_KEY
+
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({
+          stat: 'fail',
+          message: '服务器配置错误：未设置 API Key'
+        }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+    }
+
+    // 从请求中获取数据（不包含 api_key）
     const data = await context.request.json()
+
+    // 在后端添加 API Key，确保前端不暴露
+    const requestData = {
+      ...data,
+      api_key: apiKey
+    }
 
     // 转发请求到 UptimeRobot API
     const response = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      body: JSON.stringify(requestData)
     })
 
     const newResponse = new Response(response.body, response)
@@ -42,6 +66,18 @@ export async function onRequest(context) {
     return newResponse
 
   } catch (error) {
-    return new Response('请求失败', { status: 500 })
+    return new Response(
+      JSON.stringify({
+        stat: 'fail',
+        message: '请求失败: ' + error.message
+      }),
+      {
+        status: 500,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
   }
-} 
+}
