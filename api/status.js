@@ -27,8 +27,8 @@ export default async function handler(req, res) {
 
     // 在后端添加 API Key
     const requestData = {
+      api_key: apiKey,
       ...req.body,
-      api_key: apiKey
     }
 
     const response = await fetch('https://api.uptimerobot.com/v2/getMonitors', {

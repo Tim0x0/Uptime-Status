@@ -50,8 +50,8 @@ export async function onRequest(context) {
 
     // 在后端添加 API Key，确保前端不暴露
     const requestData = {
+      api_key: apiKey,
       ...data,
-      api_key: apiKey
     }
 
     // 转发请求到 UptimeRobot API
