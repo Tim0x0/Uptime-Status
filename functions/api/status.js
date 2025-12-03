@@ -27,7 +27,7 @@ export async function onRequest(context) {
 
   try {
     // 从环境变量读取 API Key（后端安全存储）
-    const apiKey = context.env.UPTIMEROBOT_API_KEY
+    const apiKey = context.env.VITE_UPTIMEROBOT_API_KEY
 
     if (!apiKey) {
       return new Response(
