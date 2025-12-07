@@ -1,34 +1,28 @@
 /**
- * API 代理实现
- * 这是一个边缘函数，运行在边缘节点上
- * 用于代理 UptimeRobot API 请求，避免跨域问题
+ * 获取 UptimeRobot 账户详情的 API 代理
+ * Cloudflare Pages / 腾讯云 EdgeOne Pages 格式
  *
- * 支持以下部署平台：
- * - 腾讯云 EdgeOne Pages
- * - Cloudflare Pages
+ * 环境变量配置：
+ * 1. UPTIMEROBOT_API_KEY: UptimeRobot API 密钥（必需）
+ * 2. ALLOWED_ORIGINS: 允许访问的域名白名单，多个域名用逗号分隔（可选）
  *
- * 环境变量配置说明：
- * 1. UPTIMEROBOT_API_KEY: UptimeRobot 的只读 API 密钥（必需）
- * 2. ALLOWED_ORIGINS: 允许访问的域名白名单，多个域名用逗号分隔（可选，不设置则允许所有）
+ * 返回精简的账户统计数据：
+ * - up_monitors: 在线监控数量
+ * - down_monitors: 离线监控数量
+ * - paused_monitors: 暂停的监控数量
+ * - total_monitors_count: 总监控数量
  */
 
 /**
  * 验证请求来源是否在白名单中
- * @param {Request} request - 请求对象
- * @param {string} allowedDomains - 允许的域名，逗号分隔
- * @returns {boolean} 是否允许访问
  */
 function isAllowedOrigin(request, allowedDomains) {
-  // 如果没有设置白名单，允许所有请求
   if (!allowedDomains) return true
 
   const whitelist = allowedDomains.split(',').map(d => d.trim().toLowerCase())
-
-  // 获取请求来源
   const origin = request.headers.get('Origin') || ''
   const referer = request.headers.get('Referer') || ''
 
-  // 从 Origin 或 Referer 中提取域名
   let requestDomain = ''
   try {
     if (origin) {
@@ -40,9 +34,7 @@ function isAllowedOrigin(request, allowedDomains) {
     return false
   }
 
-  // 检查是否在白名单中
   return whitelist.some(allowed => {
-    // 支持通配符，如 *.example.com
     if (allowed.startsWith('*.')) {
       const baseDomain = allowed.slice(2)
       return requestDomain === baseDomain || requestDomain.endsWith('.' + baseDomain)
@@ -52,7 +44,6 @@ function isAllowedOrigin(request, allowedDomains) {
 }
 
 export async function onRequest(context) {
-  // 从环境变量读取白名单配置
   const allowedOrigins = context.env.ALLOWED_ORIGINS || ''
 
   // 验证请求来源
@@ -69,7 +60,6 @@ export async function onRequest(context) {
     )
   }
 
-  // 设置 CORS 头（只允许白名单域名）
   const origin = context.request.headers.get('Origin') || '*'
   const corsHeaders = {
     'Access-Control-Allow-Origin': allowedOrigins ? origin : '*',
@@ -83,7 +73,6 @@ export async function onRequest(context) {
   }
 
   try {
-    // 从环境变量读取 API Key（后端安全存储）
     const apiKey = context.env.UPTIMEROBOT_API_KEY
 
     if (!apiKey) {
@@ -102,28 +91,47 @@ export async function onRequest(context) {
       )
     }
 
-    // 从请求中获取数据（不包含 api_key）
-    const data = await context.request.json()
-
-    // 在后端添加 API Key，确保前端不暴露
     const requestData = {
       api_key: apiKey,
-      ...data,
+      format: 'json'
     }
 
-    // 转发请求到 UptimeRobot API
-    const response = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
+    const response = await fetch('https://api.uptimerobot.com/v2/getAccountDetails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestData)
     })
 
-    const newResponse = new Response(response.body, response)
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      newResponse.headers.set(key, value)
+    const data = await response.json()
+
+    if (data.stat === 'ok' && data.account) {
+      return new Response(
+        JSON.stringify({
+          stat: 'ok',
+          data: {
+            up_monitors: data.account.up_monitors,
+            down_monitors: data.account.down_monitors,
+            paused_monitors: data.account.paused_monitors,
+            total_monitors_count: data.account.up_monitors + data.account.down_monitors + data.account.paused_monitors
+          }
+        }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      )
+    }
+
+    return new Response(JSON.stringify(data), {
+      status: response.status,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'application/json'
+      }
     })
-    newResponse.headers.set('Content-Type', 'application/json')
-    return newResponse
 
   } catch (error) {
     return new Response(

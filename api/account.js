@@ -1,5 +1,6 @@
 /**
- * API 代理 - Vercel Serverless Functions 格式
+ * 获取 UptimeRobot 账户详情的 API 代理
+ * Vercel Serverless Functions 格式
  *
  * 环境变量配置：
  * 1. UPTIMEROBOT_API_KEY: UptimeRobot API 密钥（必需）
@@ -75,16 +76,29 @@ export default async function handler(req, res) {
 
     const requestData = {
       api_key: apiKey,
-      ...req.body,
+      format: 'json'
     }
 
-    const response = await fetch('https://api.uptimerobot.com/v2/getMonitors', {
+    const response = await fetch('https://api.uptimerobot.com/v2/getAccountDetails', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestData)
     })
 
     const data = await response.json()
+
+    if (data.stat === 'ok' && data.account) {
+      return res.status(200).json({
+        stat: 'ok',
+        data: {
+          up_monitors: data.account.up_monitors,
+          down_monitors: data.account.down_monitors,
+          paused_monitors: data.account.paused_monitors,
+          total_monitors_count: data.account.up_monitors + data.account.down_monitors + data.account.paused_monitors
+        }
+      })
+    }
+
     return res.status(200).json(data)
 
   } catch (error) {

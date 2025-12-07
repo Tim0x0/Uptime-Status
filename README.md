@@ -65,6 +65,8 @@
 3. 下拉到最底部在 Main API keys 部分创建 **Read-Only API Key**
 4. 复制生成的 API Key
 
+> **注意：** 如需使用账户统计功能（`/api/account`），需要使用 **Main API Key**，Monitor-Specific API Key 不支持获取账户详情。
+
 ### API 代理说明
 
 本项目支持以下三种部署方式,均可实现自动处理跨域请求:
@@ -95,7 +97,7 @@
 
 1. 克隆项目
 ```bash
-git clone https://github.com/JLinmr/uptime-status.git
+git clone https://github.com/Tim0x0/Uptime-Status
 cd uptime-status
 ```
 
@@ -113,6 +115,11 @@ npm install
 # UptimeRobot API Key（后端使用，不会暴露到前端）
 UPTIMEROBOT_API_KEY = "你的API密钥"
 
+# 允许访问的域名白名单（可选，多个域名用英文逗号分隔）
+# 不设置则允许所有来源访问
+# 支持通配符，如 *.example.com 可匹配所有子域名
+ALLOWED_ORIGINS = "example.com,*.example.com"
+
 # UptimeRobot API URL 
 # 除腾讯云 EdgeOne Pages 、vercel 、cloudflare pages 外 
 ## 其它部署方式需要自行搭建 API 代理 
@@ -120,7 +127,7 @@ UPTIMEROBOT_API_KEY = "你的API密钥"
 VITE_UPTIMEROBOT_API_URL = "/api/status"
 
 # 站点名称
-VITE_APP_TITLE = "梦爱吃鱼"
+VITE_APP_TITLE = "Tim小屋"
 
 # 监控面板排序方式
 # 支持 friendly_name 和 create_datetime 两种方式

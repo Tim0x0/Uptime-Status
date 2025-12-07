@@ -42,7 +42,7 @@ class Validator {
   static isValidArray(arr) {
     return Array.isArray(arr) && arr.length > 0
   }
-  
+
   /**
    * 验证时间戳是否有效
    * @static
@@ -100,19 +100,19 @@ class MonitorDataProcessor {
       if (Validator.isValidArray(monitor.response_times)) {
         // 获取24小时前的时间戳
         const twentyFourHoursAgo = Math.floor((Date.now() - 24 * 60 * 60 * 1000) / 1000)
-        
+
         // 只计算最近24小时的响应时间
-        const validTimes = monitor.response_times.filter(time => 
-          time && 
-          Validator.isValidNumber(time.value) && 
+        const validTimes = monitor.response_times.filter(time =>
+          time &&
+          Validator.isValidNumber(time.value) &&
           time.datetime >= twentyFourHoursAgo
         )
-        
+
         return validTimes.length > 0
           ? Math.round(validTimes.reduce((sum, time) => sum + time.value, 0) / validTimes.length)
           : null
       }
-      
+
       // 如果没有详细的响应时间数据，则使用 average_response_time
       return Validator.isValidNumber(monitor.average_response_time)
         ? Math.round(monitor.average_response_time)
@@ -125,10 +125,10 @@ class MonitorDataProcessor {
 
   static processDowntimeLogs(logs = []) {
     const thirtyDaysAgo = TimeUtils.getThirtyDaysAgo()
-    const recentLogs = logs.filter(log => 
+    const recentLogs = logs.filter(log =>
       log.type === CONSTANTS.DOWNTIME_TYPE && log.datetime >= thirtyDaysAgo
     )
-    
+
     return {
       logs: recentLogs.sort((a, b) => b.datetime - a.datetime),
       totalDowntime: recentLogs.reduce((total, log) => total + (log.duration || 0), 0)
@@ -137,13 +137,17 @@ class MonitorDataProcessor {
 
   static processUptimeData(uptimeRanges) {
     const dailyUptimes = uptimeRanges?.split('-').map(Number).reverse() || []
-    const validUptimes = dailyUptimes.filter(Validator.isValidNumber)
-    
+
+    // 过滤空值，保留有效数字（包括 0）
+    const validUptimes = dailyUptimes.filter(val => val != null && !isNaN(val) && val >= 0)
+
+    const average = validUptimes.length > 0
+      ? (validUptimes.reduce((sum, val) => sum + parseFloat(val), 0) / validUptimes.length).toFixed(2)
+      : '0'
+
     return {
       dailyUptimes,
-      uptime: validUptimes.length > 0
-        ? validUptimes.reduce((sum, value) => sum + value, 0) / validUptimes.length
-        : 0
+      uptime: average
     }
   }
 
@@ -151,7 +155,7 @@ class MonitorDataProcessor {
     try {
       // 创建24个小时的数组
       const hourlyResponseTimes = Array(CONSTANTS.HOURS_IN_DAY).fill(null)
-      
+
       if (!Validator.isValidArray(monitor.response_times)) {
         return hourlyResponseTimes
       }
@@ -159,15 +163,15 @@ class MonitorDataProcessor {
       // 按小时分组响应时间
       const hourlyGroups = monitor.response_times.reduce((groups, time) => {
         if (!time || !Validator.isValidNumber(time.value)) return groups
-        
+
         const date = new Date(time.datetime * 1000)
         const hourIndex = Math.floor((Date.now() - date.getTime()) / (60 * 60 * 1000))
-        
+
         if (hourIndex >= 0 && hourIndex < CONSTANTS.HOURS_IN_DAY) {
           if (!groups[hourIndex]) groups[hourIndex] = []
           groups[hourIndex].push(time.value)
         }
-        
+
         return groups
       }, {})
 

@@ -2,83 +2,220 @@
 @tailwind components;
 @tailwind utilities;
 
-@keyframes border-spin {
-  0% {
-    clip-path: inset(0 100% 100% 0);
-    opacity: 0;
-  }
-  50% {
-    clip-path: inset(0 0 100% 0);
-    opacity: 1;
-  }
-  100% {
-    clip-path: inset(0 0 0 0);
-    opacity: 1;
-  }
+/* Clean Professional Design */
+
+:root {
+  /* Animation Duration */
+  --duration-fast: 150ms;
+
+  /* Professional Slate Palette */
+  --bg-body: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f5f9;
+
+  --border-subtle: #e2e8f0;
+  --border-focus: #94a3b8;
+
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-faint: #94a3b8;
+
+  /* Status Colors (Muted/Professional) */
+  --status-online: #10b981;
+  --status-online-bg: #d1fae5;
+  --status-offline: #ef4444;
+  --status-offline-bg: #fee2e2;
+  --status-warning: #f59e0b;
+  --status-warning-bg: #fef3c7;
+
+  /* Shadow */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
-@keyframes border-unspin {
-  0% {
-    clip-path: inset(0 0 0 0);
-    opacity: 1;
-  }
-  50% {
-    clip-path: inset(100% 0 0 0);
-    opacity: 1;
-  }
-  100% {
-    clip-path: inset(100% 0 0 100%);
-    opacity: 0;
-  }
+[data-theme="dark"] {
+  --bg-body: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #334155;
+
+  --border-subtle: #334155;
+  --border-focus: #64748b;
+
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-faint: #475569;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --shadow-hover: 0 4px 6px -1px rgb(0 0 0 / 0.3);
 }
 
-/* 隐藏滚动条 */
+/* Hide scrollbar */
 ::-webkit-scrollbar {
   display: none;
 }
 
 * {
-  font-family: HarmonyOS_Regular,MiSans,HarmonyOS Sans SC,sans-serif; /* 字体 */
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* 添加通用卡片样式 */
+@layer base {
+  body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    min-height: 100vh;
+    @apply transition-colors duration-300 antialiased;
+  }
+}
+
 @layer components {
-  /* 基础卡片样式 */
-  .card-base {
-    @apply p-4 rounded-xl bg-white dark:bg-gray-800/50 
-      border border-gray-200/60 dark:border-gray-700/60 
-      transition-all duration-300;
-  }
-  
-  /* 统一的边框动画样式 */
-  .animated-border {
-    @apply relative;
+  .pro-container {
+    @apply max-w-5xl mx-auto px-6 py-12;
   }
 
-  .animated-border::after {
-    @apply absolute inset-0 rounded-xl border-2 opacity-0 pointer-events-none;
-    content: '';
+  /* Professional Card */
+  .pro-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-card);
+    border-radius: 8px;
+    /* Slightly sharper corners */
+    @apply transition-all duration-200;
   }
 
-  /* 只在悬浮时显示进入动画 */
-  .animated-border:hover::after {
-    animation: border-spin 0.5s ease-out forwards;
+  .pro-card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: var(--border-focus);
   }
-  
-  /* 只在悬浮后的元素显示退出动画 */
-  .animated-border.hovered:not(:hover)::after {
-    animation: border-unspin 0.5s ease-out forwards;
-  }
-  
-  .inner-card {
-    @apply bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4
-      border border-gray-100/60 dark:border-gray-700/60;
-  }
-}
 
-#app {
-  width: 100%;
-  margin: 0 auto;
+  /* Buttons */
+  .btn-pro {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-main);
+    @apply px-4 py-2 rounded-md text-sm font-medium shadow-sm;
+    transition: background-color 150ms, border-color 150ms;
+  }
+
+  .btn-pro:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-focus);
+  }
+
+  .btn-pro:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Inputs */
+  .input-pro {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-main);
+    @apply px-3 py-2 rounded-md text-sm outline-none transition-all duration-200 shadow-sm;
+  }
+
+  .input-pro:focus {
+    border-color: var(--text-muted);
+    box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
+  }
+
+  .input-pro::placeholder {
+    color: var(--text-faint);
+  }
+
+  /* Status Indicators - Pill Style */
+  .status-pill {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border;
+  }
+
+  .status-pill.online {
+    background-color: var(--status-online-bg);
+    color: #065f46;
+    /* Darker green for text */
+    border-color: transparent;
+  }
+
+  [data-theme="dark"] .status-pill.online {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #34d399;
+  }
+
+  .status-pill.offline {
+    background-color: var(--status-offline-bg);
+    color: #991b1b;
+    border-color: transparent;
+  }
+
+  [data-theme="dark"] .status-pill.offline {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #f87171;
+  }
+
+  /* Badges */
+  .pro-badge {
+    background-color: var(--bg-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border-subtle);
+    @apply px-2 py-0.5 text-xs font-medium rounded;
+  }
+
+  /* Sparkline */
+  .sparkline {
+    @apply inline-flex items-end gap-0.5 h-6;
+  }
+
+  .sparkline-bar {
+    @apply w-1.5 rounded-sm transition-all duration-200;
+    background-color: var(--border-subtle);
+  }
+
+  .sparkline-bar.active {
+    background-color: var(--text-muted);
+  }
+
+  .sparkline-bar:hover {
+    background-color: var(--text-main);
+  }
+
+  /* Sparkline Tooltip */
+  .tooltip-sparkline {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    pointer-events: none;
+    z-index: 1000;
+    font-size: 12px;
+    backdrop-filter: blur(10px);
+    @apply transition-opacity duration-200;
+  }
+
+  [data-theme='dark'] .tooltip-sparkline {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(51, 65, 85, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .tooltip-date {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-main);
+    font-size: 11px;
+  }
+
+  .tooltip-metrics {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  .tooltip-metrics span {
+    white-space: nowrap;
+  }
 }
