@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <a href="https://vercel.com/new/clone?repository-url=https://github.com/JLinmr/uptime-status" title="使用 Vercel 部署">
+  <a href="https://vercel.com/new/clone?repository-url=https://github.com/Tim0x0/Uptime-Status" title="使用 Vercel 部署">
     <img src="https://vercel.com/button" alt="Deploy with Vercel" />
   </a>
   <a href="https://edgeone.ai/pages/new?repository-url=https%3A%2F%2Fgithub.com%2FJLinMr%2FUptime-Status&output-directory=dist&install-command=npm%20install&build-command=npm%20run%20build" target="_blank" rel="noopener noreferrer">
@@ -28,8 +28,8 @@
 </p>
 
 <p align="center">🎮 在线演示：
-  <a href="https://status.bsgun.cn" target="_blank">
-    https://status.bsgun.cn
+  <a href="https://status.timxs.com" target="_blank">
+  https://status.timxs.com
   </a>
 </p>
 
